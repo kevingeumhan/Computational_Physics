@@ -63,15 +63,15 @@ def simulate(method, timestep, T_max, th_init=theta0, w_init=w0):
             w[i+1] = w[i] + timestep * dw
             theta[i+1] = theta[i] + timestep * w[i+1]
 
-        elif method == 'rk2':
+        elif method == 'rk4':
             # Midpoint RK2
             dtheta1, dw1 = derivatives(theta[i], w[i])
             dtheta2, dw2 = derivatives(theta[i] + timestep * 0.5 * dtheta1, w[i] + timestep * 0.5 * dw1)
             dtheta3, dw3 = derivatives(theta[i] + timestep * 0.5 * dtheta2, w[i] + timestep * 0.5 * dw2)
-            dtheta4, dw4 = derivatives(theta[i] + timestep * 0.5 * dtheta3, w[i] + timestep * 0.5 * dw3)
+            dtheta4, dw4 = derivatives(theta[i] + timestep * dtheta3, w[i] + timestep * dw3)
 
-            theta[i+1] = theta[i] + (1/6) * (dtheta1 + 2*dtheta2 + 2*dtheta3 + dtheta4)
-            w[i+1] = theta[i] + (1/6) * (dw1 + 2*dw2 + 2*dw3 + dw4)
+            theta[i+1] = theta[i] + timestep * (1/6) * (dtheta1 + 2*dtheta2 + 2*dtheta3 + dtheta4)
+            w[i+1] = w[i] + timestep * (1/6) * (dw1 + 2*dw2 + 2*dw3 + dw4)
 
 
         E[i+1] = compute_energy(theta[i+1], w[i+1])
@@ -87,12 +87,12 @@ T_max = 50.0
 
 t_exp, _, _, E_exp = simulate('explicit_euler', h_fixed, T_max)
 t_sym, _, _, E_sym = simulate('symplectic_euler', h_fixed, T_max)
-t_rk2, _, _, E_rk2 = simulate('rk2', h_fixed, T_max)
+t_rk4, _, _, E_rk4 = simulate('rk4', h_fixed, T_max)
 
 
 plt.figure(figsize=(10, 5))
 plt.plot(t_exp, E_exp, label='Explicit Euler', color='red')
 plt.plot(t_sym, E_sym, label='Symplectic Euler', color='green')
-plt.plot(t_rk2, E_rk2, label='RK2 (Midpoint)', color='blue')
+plt.plot(t_rk4, E_rk4, label='RK2 (Midpoint)', color='blue')
 plt.ylim(1.3,3)
 plt.show()
